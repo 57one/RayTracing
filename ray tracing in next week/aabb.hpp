@@ -27,7 +27,7 @@ class aabb {
     //     }
     //     return true;
     // }
-    inline bool aabb::hit(const ray& r, double t_min, double t_max) const {
+    inline bool hit(const ray& r, double t_min, double t_max) const {
         for (int a = 0; a < 3; a++) {
             auto invD = 1.0f / r.direction()[a];
             auto t0 = (min()[a] - r.origin()[a]) * invD;
