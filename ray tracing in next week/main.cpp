@@ -70,6 +70,16 @@ hittable_list two_spheres() {
     return objects;
 }
 
+hittable_list two_perlin_spheres() {
+    hittable_list objects;
+
+    auto pertext = make_shared<noise_texture>();
+    objects.add(make_shared<sphere>(Point3d(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
+    objects.add(make_shared<sphere>(Point3d(0, 2, 0), 2, make_shared<lambertian>(pertext)));
+
+    return objects;
+}
+
 double hit_sphere(const Point3d& center, double radius, const ray& r) {
     Vec3d oc = r.origin() - center;
     auto a = r.direction().length_squared();
@@ -119,7 +129,7 @@ int main() {
     auto vfov = 40.0;
     auto aperture = 0.0;
 
-    switch (1) {
+    switch (0) {
         case 1:
             world = random_scene();
             lookfrom = Point3d(13, 2, 3);
@@ -128,9 +138,15 @@ int main() {
             aperture = 0.1;
             break;
 
-        default:
         case 2:
             world = two_spheres();
+            lookfrom = Point3d(13, 2, 3);
+            lookat = Point3d(0, 0, 0);
+            vfov = 20.0;
+            break;
+        default:
+        case 3:
+            world = two_perlin_spheres();
             lookfrom = Point3d(13, 2, 3);
             lookat = Point3d(0, 0, 0);
             vfov = 20.0;
