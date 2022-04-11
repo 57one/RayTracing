@@ -14,8 +14,8 @@ hittable_list random_scene() {
     auto checker = make_shared<checker_texture>(Color3d(0.2, 0.3, 0.1), Color3d(0.9, 0.9, 0.9));
     world.add(make_shared<sphere>(Point3d(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
 
-    auto ground_material = make_shared<lambertian>(Color3d(0.5, 0.5, 0.5));
-    world.add(make_shared<sphere>(Point3d(0, -1000, 0), 1000, ground_material));
+    // auto ground_material = make_shared<lambertian>(Color3d(0.5, 0.5, 0.5));
+    // world.add(make_shared<sphere>(Point3d(0, -1000, 0), 1000, ground_material));
 
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
@@ -59,6 +59,17 @@ hittable_list random_scene() {
     return world;
 }
 
+hittable_list two_spheres() {
+    hittable_list objects;
+
+    auto checker = make_shared<checker_texture>(Color3d(0.2, 0.3, 0.1), Color3d(0.9, 0.9, 0.9));
+
+    objects.add(make_shared<sphere>(Point3d(0, -10, 0), 10, make_shared<lambertian>(checker)));
+    objects.add(make_shared<sphere>(Point3d(0, 10, 0), 10, make_shared<lambertian>(checker)));
+
+    return objects;
+}
+
 double hit_sphere(const Point3d& center, double radius, const ray& r) {
     Vec3d oc = r.origin() - center;
     auto a = r.direction().length_squared();
@@ -98,17 +109,40 @@ int main() {
     const int image_height = static_cast<int>(image_width / aspect_ratio);
     const int samples_per_pixel = 100;
     const int max_depth = 50;
+
     // World
-    auto world = random_scene();
+
+    hittable_list world;
+
+    Point3d lookfrom;
+    Point3d lookat;
+    auto vfov = 40.0;
+    auto aperture = 0.0;
+
+    switch (1) {
+        case 1:
+            world = random_scene();
+            lookfrom = Point3d(13, 2, 3);
+            lookat = Point3d(0, 0, 0);
+            vfov = 20.0;
+            aperture = 0.1;
+            break;
+
+        default:
+        case 2:
+            world = two_spheres();
+            lookfrom = Point3d(13, 2, 3);
+            lookat = Point3d(0, 0, 0);
+            vfov = 20.0;
+            break;
+    }
 
     // Camera
-    Point3d lookfrom(13, 2, 3);
-    Point3d lookat(0, 0, 0);
+
     Vec3d vup(0, 1, 0);
     auto dist_to_focus = 10.0;
-    auto aperture = 0.1;
 
-    camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
+    camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
     // Render
 
