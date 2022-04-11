@@ -43,6 +43,20 @@ class perlin {
         return trilinear_interp(c, u, v, w);
     }
 
+    double turb(const Point3d& p, int depth = 7) const {
+        auto accum = 0.0;
+        auto temp_p = p;
+        auto weight = 1.0;
+
+        for (int i = 0; i < depth; i++) {
+            accum += weight * noise(temp_p);
+            weight *= 0.5;
+            temp_p *= 2;
+        }
+
+        return fabs(accum);
+    }
+
    private:
     static const int point_count = 256;
     Vec3d* ranvec;
@@ -80,10 +94,7 @@ class perlin {
             for (int j = 0; j < 2; j++)
                 for (int k = 0; k < 2; k++) {
                     Vec3d weight_v(u - i, v - j, w - k);
-                    accum += (i * uu + (1 - i) * (1 - uu)) 
-                            * (j * vv + (1 - j) * (1 - vv)) 
-                            * (k * ww + (1 - k) * (1 - ww)) 
-                            * dot(c[i][j][k], weight_v);
+                    accum += (i * uu + (1 - i) * (1 - uu)) * (j * vv + (1 - j) * (1 - vv)) * (k * ww + (1 - k) * (1 - ww)) * dot(c[i][j][k], weight_v);
                 }
 
         return accum;

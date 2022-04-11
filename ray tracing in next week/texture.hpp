@@ -53,7 +53,7 @@ class noise_texture : public texture {
     noise_texture() {}
     noise_texture(double sc) : scale(sc) {}
     virtual Color3d value(double u, double v, const Point3d& p) const override {
-        return Color3d(1,1,1) * 0.5 * (1.0 + noise.noise(scale * p));
+        return Color3d(1, 1, 1) * noise.turb(scale * p);
     }
 
    public:
