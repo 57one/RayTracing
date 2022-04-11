@@ -11,6 +11,9 @@
 hittable_list random_scene() {
     hittable_list world;
 
+    auto checker = make_shared<checker_texture>(Color3d(0.2, 0.3, 0.1), Color3d(0.9, 0.9, 0.9));
+    world.add(make_shared<sphere>(Point3d(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
+
     auto ground_material = make_shared<lambertian>(Color3d(0.5, 0.5, 0.5));
     world.add(make_shared<sphere>(Point3d(0, -1000, 0), 1000, ground_material));
 
