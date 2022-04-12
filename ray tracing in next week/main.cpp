@@ -102,22 +102,23 @@ double hit_sphere(const Point3d& center, double radius, const ray& r) {
     }
 }
 
-Color3d ray_color(const ray& r, const hittable& world, int depth) {
+Color3d ray_color(const ray& r, const Color3d& background, const hittable& world, int depth) {
     hit_record rec;
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if (depth <= 0)
         return Color3d(0, 0, 0);
-    if (world.hit(r, 0.001, infinity, rec)) {  // avoid interacting at t = -0.000001
+    // If the ray hits nothing, return the background color.
+    if (!world.hit(r, 0.001, infinity, rec))
+        return background;
 
-        ray scattered;
-        Color3d attenuation;
-        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
-            return attenuation * ray_color(scattered, world, depth - 1);
-        return Color3d(0, 0, 0);
-    }
-    Vec3d unit_direction = unit_vector(r.direction());
-    auto t = 0.5 * (unit_direction.y + 1.0);
-    return (1.0 - t) * Color3d(1.0, 1.0, 1.0) + t * Color3d(0.5, 0.7, 1.0);
+    ray scattered;
+    Color3d attenuation;
+    Color3d emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+
+    if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+        return emitted;
+
+    return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
 }
 
 int main() {
@@ -136,10 +137,12 @@ int main() {
     Point3d lookat;
     auto vfov = 40.0;
     auto aperture = 0.0;
+    Color3d background(0, 0, 0);
 
     switch (0) {
         case 1:
             world = random_scene();
+            background = Color3d(0.70, 0.80, 1.00);
             lookfrom = Point3d(13, 2, 3);
             lookat = Point3d(0, 0, 0);
             vfov = 20.0;
@@ -148,22 +151,28 @@ int main() {
 
         case 2:
             world = two_spheres();
+            background = Color3d(0.70, 0.80, 1.00);
             lookfrom = Point3d(13, 2, 3);
             lookat = Point3d(0, 0, 0);
             vfov = 20.0;
             break;
         case 3:
             world = two_perlin_spheres();
+            background = Color3d(0.70, 0.80, 1.00);
+            lookfrom = Point3d(13, 2, 3);
+            lookat = Point3d(0, 0, 0);
+            vfov = 20.0;
+            break;
+        case 4:
+            world = earth();
+            background = Color3d(0.70, 0.80, 1.00);
             lookfrom = Point3d(13, 2, 3);
             lookat = Point3d(0, 0, 0);
             vfov = 20.0;
             break;
         default:
-        case 4:
-            world = earth();
-            lookfrom = Point3d(13, 2, 3);
-            lookat = Point3d(0, 0, 0);
-            vfov = 20.0;
+        case 5:
+            background = Color3d(0.0, 0.0, 0.0);
             break;
     }
 
@@ -187,7 +196,7 @@ int main() {
                 auto u = (i + random_double()) / (image_width - 1);
                 auto v = (j + random_double()) / (image_height - 1);
                 ray r = cam.get_ray(u, v);
-                pixel_color += ray_color(r, world, max_depth);
+                pixel_color += ray_color(r, background, world, max_depth);
             }
             write_color(std::cout, pixel_color, samples_per_pixel);
         }
