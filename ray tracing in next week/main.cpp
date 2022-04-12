@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "aarect.hpp"
 #include "camera.hpp"
 #include "color.hpp"
 #include "hittable_list.hpp"
@@ -88,6 +89,19 @@ hittable_list earth() {
     return hittable_list(globe);
 }
 
+hittable_list simple_light() {
+    hittable_list objects;
+
+    auto pertext = make_shared<noise_texture>(4);
+    objects.add(make_shared<sphere>(Point3d(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
+    objects.add(make_shared<sphere>(Point3d(0, 2, 0), 2, make_shared<lambertian>(pertext)));
+
+    auto difflight = make_shared<diffuse_light>(Color3d(4, 4, 4));
+    objects.add(make_shared<xy_rect>(3, 5, 1, 3, -2, difflight));
+
+    return objects;
+}
+
 double hit_sphere(const Point3d& center, double radius, const ray& r) {
     Vec3d oc = r.origin() - center;
     auto a = r.direction().length_squared();
@@ -126,7 +140,7 @@ int main() {
     auto aspect_ratio = 16.0 / 9.0;
     int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 100;
+    int samples_per_pixel = 100;
     const int max_depth = 50;
 
     // World
@@ -172,7 +186,12 @@ int main() {
             break;
         default:
         case 5:
-            background = Color3d(0.0, 0.0, 0.0);
+            world = simple_light();
+            samples_per_pixel = 400;
+            background = Color3d(0, 0, 0);
+            lookfrom = Point3d(26, 3, 6);
+            lookat = Point3d(0, 2, 0);
+            vfov = 20.0;
             break;
     }
 
