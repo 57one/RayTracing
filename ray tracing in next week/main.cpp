@@ -116,6 +116,24 @@ double hit_sphere(const Point3d& center, double radius, const ray& r) {
     }
 }
 
+hittable_list cornell_box() {
+    hittable_list objects;
+
+    auto red = make_shared<lambertian>(Color3d(.65, .05, .05));
+    auto white = make_shared<lambertian>(Color3d(.73, .73, .73));
+    auto green = make_shared<lambertian>(Color3d(.12, .45, .15));
+    auto light = make_shared<diffuse_light>(Color3d(15, 15, 15));
+
+    objects.add(make_shared<yz_rect>(0, 555, 0, 555, 555, green));
+    objects.add(make_shared<yz_rect>(0, 555, 0, 555, 0, red));
+    objects.add(make_shared<xz_rect>(213, 343, 227, 332, 554, light));
+    objects.add(make_shared<xz_rect>(0, 555, 0, 555, 0, white));
+    objects.add(make_shared<xz_rect>(0, 555, 0, 555, 555, white));
+    objects.add(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+
+    return objects;
+}
+
 Color3d ray_color(const ray& r, const Color3d& background, const hittable& world, int depth) {
     hit_record rec;
     // If we've exceeded the ray bounce limit, no more light is gathered.
@@ -139,7 +157,7 @@ int main() {
     // Image
     auto aspect_ratio = 16.0 / 9.0;
     int image_width = 400;
-    const int image_height = static_cast<int>(image_width / aspect_ratio);
+    int image_height = static_cast<int>(image_width / aspect_ratio);
     int samples_per_pixel = 100;
     const int max_depth = 50;
 
@@ -184,7 +202,7 @@ int main() {
             lookat = Point3d(0, 0, 0);
             vfov = 20.0;
             break;
-        default:
+
         case 5:
             world = simple_light();
             samples_per_pixel = 400;
@@ -193,7 +211,20 @@ int main() {
             lookat = Point3d(0, 2, 0);
             vfov = 20.0;
             break;
+        default:
+        case 6:
+            world = cornell_box();
+            aspect_ratio = 1.0;
+            image_width = 600;
+            samples_per_pixel = 200;
+            background = Color3d(0, 0, 0);
+            lookfrom = Point3d(278, 278, -800);
+            lookat = Point3d(278, 278, 0);
+            vfov = 40.0;
+            break;
     }
+
+    image_height = static_cast<int>(image_width / aspect_ratio);
 
     // Camera
 
