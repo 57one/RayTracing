@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "aarect.hpp"
+#include "bvh.hpp"
 #include "camera.hpp"
 #include "color.hpp"
 #include "hittable_list.hpp"
@@ -102,20 +103,6 @@ hittable_list simple_light() {
     return objects;
 }
 
-double hit_sphere(const Point3d& center, double radius, const ray& r) {
-    Vec3d oc = r.origin() - center;
-    auto a = r.direction().length_squared();
-    auto half_b = dot(oc, r.direction());
-    auto c = oc.length_squared() - radius * radius;
-    auto discriminant = half_b * half_b - a * c;
-
-    if (discriminant < 0) {
-        return -1.0;
-    } else {
-        return (-half_b - sqrt(discriminant)) / a;
-    }
-}
-
 hittable_list cornell_box() {
     hittable_list objects;
 
@@ -132,6 +119,20 @@ hittable_list cornell_box() {
     objects.add(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
 
     return objects;
+}
+
+double hit_sphere(const Point3d& center, double radius, const ray& r) {
+    Vec3d oc = r.origin() - center;
+    auto a = r.direction().length_squared();
+    auto half_b = dot(oc, r.direction());
+    auto c = oc.length_squared() - radius * radius;
+    auto discriminant = half_b * half_b - a * c;
+
+    if (discriminant < 0) {
+        return -1.0;
+    } else {
+        return (-half_b - sqrt(discriminant)) / a;
+    }
 }
 
 Color3d ray_color(const ray& r, const Color3d& background, const hittable& world, int depth) {
@@ -223,6 +224,8 @@ int main() {
             vfov = 40.0;
             break;
     }
+    // bvh
+    bvh_node bvh_world = bvh_node(world.objects, 0, world.objects.size(), 0.f, 1.f);
 
     image_height = static_cast<int>(image_width / aspect_ratio);
 
@@ -246,7 +249,7 @@ int main() {
                 auto u = (i + random_double()) / (image_width - 1);
                 auto v = (j + random_double()) / (image_height - 1);
                 ray r = cam.get_ray(u, v);
-                pixel_color += ray_color(r, background, world, max_depth);
+                pixel_color += ray_color(r, background, bvh_world, max_depth);
             }
             write_color(std::cout, pixel_color, samples_per_pixel);
         }
