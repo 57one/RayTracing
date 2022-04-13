@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "aarect.hpp"
+#include "box.hpp"
 #include "bvh.hpp"
 #include "camera.hpp"
 #include "color.hpp"
@@ -117,6 +118,8 @@ hittable_list cornell_box() {
     objects.add(make_shared<xz_rect>(0, 555, 0, 555, 0, white));
     objects.add(make_shared<xz_rect>(0, 555, 0, 555, 555, white));
     objects.add(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+    objects.add(make_shared<box>(Point3d(130, 0, 65), Point3d(295, 165, 230), white));
+    objects.add(make_shared<box>(Point3d(265, 0, 295), Point3d(430, 330, 460), white));
 
     return objects;
 }
