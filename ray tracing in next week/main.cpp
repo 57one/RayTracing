@@ -156,7 +156,7 @@ hittable_list cornell_smoke() {
     box2 = make_shared<rotate_y>(box2, -18);
     box2 = make_shared<translate>(box2, Vec3d(130, 0, 65));
 
-    objects.add(make_shared<constant_medium>(box1, 0.01, Color3d(0, 0, 0)));
+    objects.add(make_shared<constant_medium>(box1, 0.01, Color3d(0.5, 0.5, 0.5)));
     objects.add(make_shared<constant_medium>(box2, 0.01, Color3d(1, 1, 1)));
 
     return objects;
